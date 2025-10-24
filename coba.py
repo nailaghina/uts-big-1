@@ -103,7 +103,7 @@ load_bg_animation()
 st.markdown(
     """
     <div style='padding: 60px; text-align:center;'>
-        <h1 style='color:#7cd3ff;'>Welcome to Exifa_net ❄️</h1>
+        <h1 style='color:#7cd3ff;'>Welcome to Watch n Stopwatch ❄️</h1>
         <p style='color:#c4c4c4;'>Upload image and configure your model.</p>
     </div>
     """,
@@ -118,3 +118,4 @@ if selected == "File Input":
 elif selected == "Model Configuration":
     st.subheader("⚙️ Model Settings")
     st.slider("Confidence Threshold", 0.1, 1.0, 0.5)
+
