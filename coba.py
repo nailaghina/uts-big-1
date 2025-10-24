@@ -71,6 +71,35 @@ def load_bg():
     except:
         st.warning("stars.css tidak ditemukan! Background tidak muncul.")
 
+import random
+import streamlit as st
+
+def generate_stars():
+    # Generate 150 twinkling stars
+    stars_html = ""
+    for _ in range(150):
+        x = random.randint(0, 100)
+        y = random.randint(0, 100)
+        stars_html += f'<div class="star" style="top:{y}vh; left:{x}vw;"></div>'
+
+    # Generate 20 falling stars
+    for _ in range(20):
+        x = random.randint(0, 100)
+        stars_html += f'<div class="falling-star" style="left:{x}vw;"></div>'
+
+    # Generate 30 SVG sharp stars
+    for _ in range(30):
+        x = random.randint(0, 100)
+        y = random.randint(0, 100)
+        stars_html += f'''
+        <svg class="svg-star" style="top:{y}vh; left:{x}vw;" viewBox="0 0 24 24">
+            <polygon points="12,2 15,9 23,9 17,14 19,21 12,17 
+                             5,21 7,14 1,9 9,9"/>
+        </svg>
+        '''
+
+    st.markdown(f"<div>{stars_html}</div>", unsafe_allow_html=True)
+
 
 # ==========================
 # Load Models
@@ -78,7 +107,7 @@ def load_bg():
 @st.cache_resource
 def load_models():
     yolo = YOLO("model/best.pt")
-    classifier = tf.keras.models.load_model("model/classifier_model.h5")
+    classifier = tf.keras.models.load_model("model/best.h5")
     return yolo, classifier
 
 
@@ -139,3 +168,4 @@ elif menu == "Konfigurasi Gambar":
     st.title("⚙️ Konfigurasi Gambar")
     st.info("Pengaturan gambar dan model akan ditambahkan di sini ✨")
     st.write("Silahkan request fitur tambahan jika diperlukan ✅")
+
