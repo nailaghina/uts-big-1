@@ -6,49 +6,71 @@ import numpy as np
 from PIL import Image
 import cv2
 
-# ==========================
-# Load Models
-# ==========================
+import streamlit as st
+from ultralytics import YOLO
+import cv2
+import numpy as np
+from PIL import Image
+
+st.set_page_config(page_title="Deteksi Bintang", layout="wide")
+
+# ====== CSS untuk bintang UI ======
+st.markdown("""
+<style>
+    .star {
+        color: silver;
+        font-size: 30px;
+        animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+        50% { opacity: 0.2; }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("<h3 style='text-align: center;'>⭐ Deteksi Bintang ⭐</h3>", unsafe_allow_html=True)
+
+# ====== Load model YOLO ======
 @st.cache_resource
-def load_models():
-    yolo_model = YOLO("model/best.pt")  # Model deteksi objek
-    classifier = tf.keras.models.load_model("model/best.h5")  # Model klasifikasi
-    return yolo_model, classifier
+def load_model():
+    return YOLO("model/best.pt")
 
-yolo_model, classifier = load_models()
+model = load_model()
 
-# ==========================
-# UI
-# ==========================
-st.title("🧠 Image Classification & Object Detection App")
+uploaded_file = st.file_uploader("Upload Gambar...", type=["jpg", "jpeg", "png"])
 
-menu = st.sidebar.selectbox("Pilih Mode:", ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
+if uploaded_file:
+    image = Image.open(uploaded_file).convert("RGB")
+    img_array = np.array(image)
 
-uploaded_file = st.file_uploader("Unggah Gambar", type=["jpg", "jpeg", "png"])
+    # Inference
+    results = model.predict(source=img_array, conf=0.5)
 
-if uploaded_file is not None:
-    img = Image.open(uploaded_file)
-    st.image(img, caption="Gambar yang Diupload", use_container_width=True)
+    annotated_frame = img_array.copy()
 
-    if menu == "Deteksi Objek (YOLO)":
-        # Deteksi objek
-        results = yolo_model(img)
-        result_img = results[0].plot()  # hasil deteksi (gambar dengan box)
-        st.image(result_img, caption="Hasil Deteksi", use_container_width=True)
+    for r in results:
+        for box in r.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-    elif menu == "Klasifikasi Gambar":
-        # Preprocessing
-        img_resized = img.resize((224, 224))  # sesuaikan ukuran dengan model kamu
-        img_array = image.img_to_array(img_resized)
-        img_array = np.expand_dims(img_array, axis=0)
-        img_array = img_array / 255.0
+            # Tambahkan bintang pada setiap objek
+            cv2.putText(
+                annotated_frame,
+                "*", (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1, (192, 192, 192),
+                2, cv2.LINE_AA
+            )
+            cv2.rectangle(
+                annotated_frame,
+                (x1, y1), (x2, y2),
+                (255, 255, 255), 2
+            )
 
-        # Prediksi
-        prediction = classifier.predict(img_array)
-        class_index = np.argmax(prediction)
-        st.write("### Hasil Prediksi:", class_index)
+    st.image(annotated_frame, caption="Hasil Deteksi")
 
-        st.write("Probabilitas:", np.max(prediction))
+    # ⭐ Tambahkan indikator UI
+    st.markdown("<p class='star'>⭐ Deteksi Berhasil! ⭐</p>", unsafe_allow_html=True)
+
 
 import streamlit as st
 from streamlit_option_menu import option_menu
@@ -168,4 +190,5 @@ elif menu == "Konfigurasi Gambar":
     st.title("⚙️ Konfigurasi Gambar")
     st.info("Pengaturan gambar dan model akan ditambahkan di sini ✨")
     st.write("Silahkan request fitur tambahan jika diperlukan ✅")
+
 
