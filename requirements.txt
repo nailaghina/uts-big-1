@@ -1,8 +1,7 @@
 streamlit
-streamlit-option-menu
 ultralytics
 opencv-python-headless
-tensorflow
-h5py
 Pillow
 numpy
+tensorflow
+streamlit-option-menu
