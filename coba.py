@@ -51,71 +51,62 @@ if uploaded_file is not None:
         st.write("Probabilitas:", np.max(prediction))
 
 import streamlit as st
-from streamlit_option_menu import option_menu
-import base64
+from ultralytics import YOLO
+import tensorflow as tf
+from tensorflow.keras.preprocessing import image
+from PIL import Image
+import numpy as np
+import cv2
 
-# =================================
-# PAGE CONFIG
-# =================================
-st.set_page_config(
-    page_title="Watch n Stopwatch",
-    page_icon="📸",
-    layout="wide",
-)
+# ==========================
+# Load Models
+# ==========================
+@st.cache_resource
+def load_models():
+    yolo_model = YOLO("model/best.pt")  # Model YOLO
+    classifier = tf.keras.models.load_model("model/best.h5")
+    return yolo_model, classifier
 
-# =================================
-# BACKGROUND ANIMATION (CSS)
-# =================================
-def load_bg_animation():
+yolo_model, classifier = load_models()
+
+# ==========================
+# Styling From CSS
+# ==========================
+try:
     with open("bg.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning("⚠️ File bg.css tidak ditemukan. Background mungkin tidak muncul.")
 
-# =================================
-# SIDEBAR
-# =================================
-with st.sidebar:
-    st.markdown("<h2 style='color:white;'>📸 Exifa_net</h2>", unsafe_allow_html=True)
-    
-    selected = option_menu(
-        menu_title=None,
-        options=["File Input", "Model Configuration"],
-        icons=["upload", "gear"],
-        menu_icon="cast",
-        default_index=0,
-        styles={
-            "container": {"background-color": "transparent"},
-            "icon": {"color": "#00BFFF"},
-            "nav-link": {
-                "color": "#eee",
-                "font-size": "15px",
-                "text-align": "left",
-                "margin": "0px",
-            },
-            "nav-link-selected": {"background-color": "#1f5e7a"},
-        }
-    )
+# ==========================
+# UI Layout
+# ==========================
+st.title("🎯 Image Detection System")
 
-# =================================
-# CONTENT AREA
-# =================================
-load_bg_animation()
+menu = st.sidebar.radio("Pilih Menu:", ["Deteksi Gambar", "Kamera"])
 
-st.markdown(
-    """
-    <div style='padding: 60px; text-align:center;'>
-        <h1 style='color:#7cd3ff;'>Welcome to Watch n Stopwatch ❄️</h1>
-        <p style='color:#c4c4c4;'>Upload image and configure your model.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# ==========================
+# Upload Image Menu
+# ==========================
+if menu == "Deteksi Gambar":
+    st.subheader("Upload Gambar")
+    uploaded_file = st.file_uploader("Pilih gambar...", type=["jpg", "jpeg", "png"])
 
-if selected == "File Input":
-    uploaded_file = st.file_uploader("📂 Upload gambar", type=["jpg", "png"])
-    if uploaded_file is not None:
-        st.image(uploaded_file, use_column_width=True)
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        st.image(img, caption="Gambar asli", use_column_width=True)
 
-elif selected == "Model Configuration":
-    st.subheader("⚙️ Model Settings")
-    st.slider("Confidence Threshold", 0.1, 1.0, 0.5)
+        if st.button("Deteksi Sekarang"):
+            # YOLO Detection
+            results = yolo_model.predict(np.array(img))
+            annotated = results[0].plot()
 
+            st.image(annotated, caption="Hasil YOLO", use_column_width=True)
+            st.success("✅ Deteksi selesai!")
+
+# ==========================
+# Camera Mode
+# ==========================
+elif menu == "Kamera":
+    st.subheader("Mode Kamera")
+    st.info("📷 Fitur kamera belum diaktifkan!")
