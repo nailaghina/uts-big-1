@@ -58,6 +58,21 @@ from PIL import Image
 import numpy as np
 import cv2
 
+def load_bg_animation():
+    with open("stars.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_bg_animation()
+
+# Tambahkan lapisan bintang
+st.markdown(
+    """
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>
+    """,
+    unsafe_allow_html=True
+)
 # ==========================
 # Load Models
 # ==========================
@@ -73,17 +88,17 @@ yolo_model, classifier = load_models()
 # Styling From CSS
 # ==========================
 try:
-    with open("bg.css") as f:
+    with open("stars.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except FileNotFoundError:
-    st.warning("⚠️ File bg.css tidak ditemukan. Background mungkin tidak muncul.")
+    st.warning("⚠️ File stars.css tidak ditemukan. Background mungkin tidak muncul.")
 
 # ==========================
 # UI Layout
 # ==========================
 st.title("🎯 Image Detection System")
 
-menu = st.sidebar.radio("Pilih Menu:", ["Deteksi Gambar", "Kamera"])
+menu = st.radio("Pilih Menu:", ["Deteksi Gambar", "Konfigurasi Gambar"])
 
 # ==========================
 # Upload Image Menu
@@ -105,8 +120,10 @@ if menu == "Deteksi Gambar":
             st.success("✅ Deteksi selesai!")
 
 # ==========================
-# Camera Mode
+# KOnfigurasi Mode
 # ==========================
-elif menu == "Kamera":
-    st.subheader("Mode Kamera")
-    st.info("📷 Fitur kamera belum diaktifkan!")
+elif menu == "Konfigurasi Gambar":
+    st.title("Konfigurasi Gambar")
+    st.write("Silakan atur konfigurasi model atau gambar di sini.")
+
+
