@@ -51,79 +51,91 @@ if uploaded_file is not None:
         st.write("Probabilitas:", np.max(prediction))
 
 import streamlit as st
+from streamlit_option_menu import option_menu
 from ultralytics import YOLO
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
 from PIL import Image
 import numpy as np
-import cv2
+import io
+import base64
+import random
 
-def load_bg_animation():
-    with open("stars.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-load_bg_animation()
+# ==========================
+# Load CSS Stars Background
+# ==========================
+def load_bg():
+    try:
+        with open("stars.css") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except:
+        st.warning("stars.css tidak ditemukan! Background tidak muncul.")
 
-# Tambahkan lapisan bintang
-st.markdown(
-    """
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>
-    """,
-    unsafe_allow_html=True
-)
+
 # ==========================
 # Load Models
 # ==========================
 @st.cache_resource
 def load_models():
-    yolo_model = YOLO("model/best.pt")  # Model YOLO
-    classifier = tf.keras.models.load_model("model/best.h5")
-    return yolo_model, classifier
+    yolo = YOLO("model/best.pt")
+    classifier = tf.keras.models.load_model("model/classifier_model.h5")
+    return yolo, classifier
 
-yolo_model, classifier = load_models()
 
-# ==========================
-# Styling From CSS
-# ==========================
-try:
-    with open("stars.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except FileNotFoundError:
-    st.warning("⚠️ File stars.css tidak ditemukan. Background mungkin tidak muncul.")
+# Apply Background
+load_bg()
+
+# Load Models
+yolo_model, classifier_model = load_models()
+
 
 # ==========================
-# UI Layout
+# Sidebar Navigation
 # ==========================
-st.title("🎯 Image Detection System")
+st.sidebar.header("Pilih Mode:")
+selected_mode = st.sidebar.selectbox("",
+                                     ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
 
-menu = st.radio("Pilih Menu:", ["Deteksi Gambar", "Konfigurasi Gambar"])
+st.sidebar.header("Pilih Menu:")
+menu = st.sidebar.radio("", ["Deteksi Gambar", "Konfigurasi Gambar"])
+
 
 # ==========================
-# Upload Image Menu
+# Image Upload Section
 # ==========================
 if menu == "Deteksi Gambar":
-    st.subheader("Upload Gambar")
-    uploaded_file = st.file_uploader("Pilih gambar...", type=["jpg", "jpeg", "png"])
+
+    st.title("📌 Image Detection System")
+
+    uploaded_file = st.file_uploader("Unggah Gambar...",
+                                     type=["jpg", "jpeg", "png"])
 
     if uploaded_file:
         img = Image.open(uploaded_file)
-        st.image(img, caption="Gambar asli", use_column_width=True)
+        st.image(img, caption="Gambar berhasil diunggah ✅", use_column_width=True)
 
-        if st.button("Deteksi Sekarang"):
-            # YOLO Detection
-            results = yolo_model.predict(np.array(img))
-            annotated = results[0].plot()
+        if st.button("Proses Deteksi"):
+            if selected_mode == "Deteksi Objek (YOLO)":
+                results = yolo_model.predict(np.array(img))
+                result_img = results[0].plot()
 
-            st.image(annotated, caption="Hasil YOLO", use_column_width=True)
-            st.success("✅ Deteksi selesai!")
+                st.image(result_img,
+                         caption="Hasil Deteksi Objek ✅",
+                         use_column_width=True)
+
+            else:
+                img_resized = img.resize((224, 224))
+                img_array = np.expand_dims(np.array(img_resized) / 255.0, axis=0)
+                result = classifier_model.predict(img_array)
+                class_idx = np.argmax(result)
+
+                st.success(f"✅ Hasil Klasifikasi: Kelas {class_idx}")
+
 
 # ==========================
-# KOnfigurasi Mode
+# Configuration Section
 # ==========================
 elif menu == "Konfigurasi Gambar":
-    st.title("Konfigurasi Gambar")
-    st.write("Silakan atur konfigurasi model atau gambar di sini.")
-
-
+    st.title("⚙️ Konfigurasi Gambar")
+    st.info("Pengaturan gambar dan model akan ditambahkan di sini ✨")
+    st.write("Silahkan request fitur tambahan jika diperlukan ✅")
