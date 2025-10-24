@@ -1,76 +1,50 @@
-/* Background warna gelap */
-body {
-    background-color: #0c0f16;
+/* Background Gelap */
+.stApp {
+    background-color: #0B0F19 !important;
+    overflow: hidden;
 }
 
-/* Transparan konten utama */
-.main {
-    background: transparent;
-}
-
-/* Sidebar style */
-.sidebar .sidebar-content {
-    background: #1b1f2a;
-    color: white;
-}
-
-/* Warna tulisan */
-h1, h2, h3, p, label {
-    color: white !important;
-}
-
-/* --- ANIMASI BINTANG --- */
-#stars, #stars2, #stars3 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* Lapisan bintang pertama */
-#stars:after {
-    content: " ";
+/* Bintang Kelap-Kelip */
+.star {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent url("https://i.ibb.co/GJXRppm/stars-small.png") repeat;
-    background-size: 1px 1px;
-    animation: animStar 100s linear infinite;
-}
-
-/* Lapisan kedua bintang */
-#stars2:after {
-    content: " ";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent url("https://i.ibb.co/GJXRppm/stars-small.png") repeat;
-    background-size: 2px 2px;
-    animation: animStar 150s linear infinite;
+    width: 4px;
+    height: 4px;
+    background: silver;
+    border-radius: 50%;
     opacity: 0.7;
+    animation: twinkle 2s infinite ease-in-out;
 }
 
-/* Lapisan ketiga bintang */
-#stars3:after {
-    content: " ";
+@keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.4); }
+    100% { opacity: 0.2; transform: scale(0.8); }
+}
+
+/* Bintang Jatuh */
+.falling-star {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: transparent url("https://i.ibb.co/GJXRppm/stars-small.png") repeat;
-    background-size: 3px 3px;
-    animation: animStar 200s linear infinite;
-    opacity: 0.5;
+    width: 6px;
+    height: 6px;
+    background: silver;
+    opacity: 0.9;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 
+                       79% 91%, 50% 70%, 21% 91%, 32% 57%, 
+                       2% 35%, 39% 35%);
+    animation: fall 5s linear infinite;
 }
 
-@keyframes animStar {
-    from {transform: translateY(0px);}
-    to {transform: translateY(1000px);}
+@keyframes fall {
+    0% { transform: translateY(-10px) translateX(0); opacity: 1; }
+    100% { transform: translateY(120vh) translateX(30vw); opacity: 0; }
+}
+
+/* SVG Bintang Tajam */
+.svg-star {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    fill: silver;
+    opacity: 0.9;
+    animation: twinkle 3s infinite;
 }
