@@ -49,3 +49,72 @@ if uploaded_file is not None:
         st.write("### Hasil Prediksi:", class_index)
 
         st.write("Probabilitas:", np.max(prediction))
+
+import streamlit as st
+from streamlit_option_menu import option_menu
+import base64
+
+# =================================
+# PAGE CONFIG
+# =================================
+st.set_page_config(
+    page_title="Watch n Stopwatch",
+    page_icon="📸",
+    layout="wide",
+)
+
+# =================================
+# BACKGROUND ANIMATION (CSS)
+# =================================
+def load_bg_animation():
+    with open("bg.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# =================================
+# SIDEBAR
+# =================================
+with st.sidebar:
+    st.markdown("<h2 style='color:white;'>📸 Exifa_net</h2>", unsafe_allow_html=True)
+    
+    selected = option_menu(
+        menu_title=None,
+        options=["File Input", "Model Configuration"],
+        icons=["upload", "gear"],
+        menu_icon="cast",
+        default_index=0,
+        styles={
+            "container": {"background-color": "transparent"},
+            "icon": {"color": "#00BFFF"},
+            "nav-link": {
+                "color": "#eee",
+                "font-size": "15px",
+                "text-align": "left",
+                "margin": "0px",
+            },
+            "nav-link-selected": {"background-color": "#1f5e7a"},
+        }
+    )
+
+# =================================
+# CONTENT AREA
+# =================================
+load_bg_animation()
+
+st.markdown(
+    """
+    <div style='padding: 60px; text-align:center;'>
+        <h1 style='color:#7cd3ff;'>Welcome to Exifa_net ❄️</h1>
+        <p style='color:#c4c4c4;'>Upload image and configure your model.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+if selected == "File Input":
+    uploaded_file = st.file_uploader("📂 Upload gambar", type=["jpg", "png"])
+    if uploaded_file is not None:
+        st.image(uploaded_file, use_column_width=True)
+
+elif selected == "Model Configuration":
+    st.subheader("⚙️ Model Settings")
+    st.slider("Confidence Threshold", 0.1, 1.0, 0.5)
